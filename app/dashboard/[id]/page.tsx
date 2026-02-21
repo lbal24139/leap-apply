@@ -51,6 +51,7 @@ export default async function TaskDetailPage({ params }: { params: { id: string 
         </div>
 
         <TaskDetailForm
+          taskId={task.id}
           action={boundAction}
           existingProfile={task.existing_profile}
           jobDescription={task.job_description}
