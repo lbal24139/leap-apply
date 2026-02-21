@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import CreateTaskModal from './create-task-modal'
+import LogoutButton from './logout-button'
 
 type Task = {
   id: string
@@ -17,9 +18,7 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
+  if (!user) redirect('/login')
 
   const { data: tasks } = await supabase
     .from('tasks')
@@ -28,60 +27,117 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 py-10">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-8">
+    <div className="min-h-screen bg-[#F8FAFC]">
+      {/* ── Navbar ─────────────────────────────────────── */}
+      <nav className="sticky top-0 z-10 bg-white border-b border-slate-100 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <LogoMark />
+            <span className="font-bold text-[#0F172A] tracking-tight">Leap Apply</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:block text-sm text-[#64748B]">{user.email}</span>
+            <LogoutButton />
+          </div>
+        </div>
+      </nav>
+
+      {/* ── Content ────────────────────────────────────── */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">My Tasks</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{user.email}</p>
+            <h1 className="text-xl font-bold text-[#0F172A]">My Applications</h1>
+            <p className="text-sm text-[#64748B] mt-0.5">
+              {tasks?.length ?? 0} task{tasks?.length !== 1 ? 's' : ''}
+            </p>
           </div>
           <CreateTaskModal />
         </div>
 
-        {/* Task list */}
         {tasks && tasks.length > 0 ? (
           <ul className="space-y-3">
             {tasks.map((task: Task) => (
               <li key={task.id}>
-                <Link
-                  href={`/dashboard/${task.id}`}
-                  className="block bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-gray-300 hover:shadow-md transition-all"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="font-medium text-gray-900">{task.name}</p>
-                      <p className="text-sm text-gray-500 mt-0.5">{task.company}</p>
+                <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group">
+                  {/* Left accent border */}
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 group-hover:bg-indigo-600 transition-colors duration-200" />
+                  <Link
+                    href={`/dashboard/${task.id}`}
+                    className="block bg-white pl-6 pr-5 py-4"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-[#0F172A] truncate">{task.name}</p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                            {task.company}
+                          </span>
+                          {task.notes && (
+                            <span className="text-xs text-[#64748B] truncate hidden sm:block">
+                              {task.notes}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <time
+                        dateTime={task.created_at}
+                        className="shrink-0 text-xs text-[#64748B] pt-0.5"
+                      >
+                        {new Date(task.created_at).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </time>
                     </div>
-                    <time
-                      dateTime={task.created_at}
-                      className="text-xs text-gray-400 shrink-0 pt-0.5"
-                    >
-                      {new Date(task.created_at).toLocaleDateString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </time>
-                  </div>
-                  {task.notes && (
-                    <p className="text-sm text-gray-600 mt-3 pt-3 border-t border-gray-50">
-                      {task.notes}
-                    </p>
-                  )}
-                </Link>
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-gray-400 text-sm">No tasks yet.</p>
-            <p className="text-gray-400 text-sm mt-1">
-              Click <span className="font-medium text-gray-600">Create Task</span> to add your first one.
-            </p>
-          </div>
+          <EmptyState />
         )}
+      </main>
+    </div>
+  )
+}
+
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 mb-5">
+        <svg className="h-8 w-8 text-indigo-400" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"
+            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          />
+          <path
+            d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"
+            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          />
+          <path d="M12 12v4M10 14h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
       </div>
-    </main>
+      <h3 className="text-base font-semibold text-[#0F172A] mb-1">No applications yet</h3>
+      <p className="text-sm text-[#64748B] max-w-xs">
+        Create your first task to start tailoring your resume for a role.
+      </p>
+    </div>
+  )
+}
+
+function LogoMark() {
+  return (
+    <svg className="h-7 w-7 text-indigo-600" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <rect width="28" height="28" rx="8" fill="currentColor" fillOpacity="0.12" />
+      <path
+        d="M8 20l5-12 5 12M10.5 15h5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }

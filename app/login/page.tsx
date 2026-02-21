@@ -10,26 +10,73 @@ export default function LoginPage() {
       provider: 'google',
       options: {
         redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        queryParams: { prompt: 'select_account' },
       },
     })
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm p-8 bg-white rounded-2xl shadow-sm border border-gray-100">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-1">Welcome</h1>
-        <p className="text-gray-500 text-sm mb-8">Sign in to continue</p>
+    <main className="min-h-screen bg-gradient-to-br from-[#F8FAFC] via-indigo-50 to-[#F8FAFC] flex items-center justify-center p-4">
+      <div className="w-full max-w-5xl grid md:grid-cols-2 md:min-h-[560px] md:shadow-2xl md:rounded-3xl overflow-hidden">
 
-        <button
-          onClick={signInWithGoogle}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
-        >
-          <GoogleIcon />
-          Sign in with Google
-        </button>
+        {/* ── Left: hero ─────────────────────────────────── */}
+        <div className="hidden md:flex flex-col justify-center bg-gradient-to-br from-indigo-600 to-indigo-500 px-12 py-16 text-white">
+          <div className="flex items-center gap-2.5 mb-10">
+            <LogoMark />
+            <span className="text-xl font-bold tracking-tight">Leap Apply</span>
+          </div>
 
-        {/* Show error param if auth failed */}
-        <ErrorMessage />
+          <h1 className="text-4xl font-bold leading-tight tracking-tight">
+            Tailor your resume.<br />Land your dream job.
+          </h1>
+
+          <p className="mt-4 text-indigo-100 text-base leading-relaxed">
+            AI-powered tools that help you stand out for every role you apply to.
+          </p>
+
+          <ul className="mt-10 space-y-4">
+            {[
+              'Tailored resume generated for each application',
+              'Gap analysis so you know what to prepare',
+              'One-click PDF export ready to send',
+            ].map((feature) => (
+              <li key={feature} className="flex items-start gap-3 text-sm text-indigo-100">
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-indigo-200" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8l3.5 3.5 6.5-7" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {feature}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* ── Right: sign-in card ─────────────────────────── */}
+        <div className="flex flex-col justify-center bg-white px-8 py-12 md:px-12">
+          {/* Mobile-only brand mark */}
+          <div className="flex items-center gap-2 mb-8 md:hidden">
+            <LogoMark className="text-indigo-600" />
+            <span className="text-lg font-bold tracking-tight text-[#0F172A]">Leap Apply</span>
+          </div>
+
+          <h2 className="text-2xl font-bold text-[#0F172A]">Welcome back</h2>
+          <p className="mt-1.5 text-sm text-[#64748B]">
+            Sign in to continue to Leap Apply
+          </p>
+
+          <button
+            onClick={signInWithGoogle}
+            className="mt-8 w-full inline-flex items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-[#0F172A] shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
+          >
+            <GoogleIcon />
+            Sign in with Google
+          </button>
+
+          <ErrorMessage />
+
+          <p className="mt-8 text-center text-xs text-[#64748B]">
+            By signing in you agree to our terms and privacy policy.
+          </p>
+        </div>
       </div>
     </main>
   )
@@ -43,6 +90,21 @@ function ErrorMessage() {
     <p className="mt-4 text-center text-sm text-red-500">
       Authentication failed. Please try again.
     </p>
+  )
+}
+
+function LogoMark({ className = 'text-white' }: { className?: string }) {
+  return (
+    <svg className={`h-7 w-7 ${className}`} viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <rect width="28" height="28" rx="8" fill="currentColor" fillOpacity="0.15" />
+      <path
+        d="M8 20l5-12 5 12M10.5 15h5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 

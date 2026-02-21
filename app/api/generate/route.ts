@@ -73,9 +73,8 @@ export async function POST(request: NextRequest) {
     async start(controller) {
       try {
         const messageStream = anthropic.messages.stream({
-          model: 'claude-opus-4-6',
+          model: 'claude-haiku-4-5',
           max_tokens: 8192,
-          thinking: { type: 'adaptive' },
           system: SYSTEM_PROMPT,
           messages: [
             {

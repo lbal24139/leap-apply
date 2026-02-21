@@ -3,21 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #F8FAFC;
+  --foreground: #0F172A;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 @layer utilities {
@@ -27,6 +19,32 @@ body {
 }
 
 dialog::backdrop {
-  background: rgb(0 0 0 / 0.4);
-  backdrop-filter: blur(2px);
+  background: rgb(0 0 0 / 0.45);
+  backdrop-filter: blur(3px);
+}
+
+/* ── Resume HTML renderer ───────────────────────────────────── */
+.resume-content h3 {
+  @apply font-semibold text-[#0F172A] text-xs uppercase tracking-widest
+         mt-5 mb-2 pb-1 border-b border-slate-200 first:mt-0;
+}
+
+.resume-content ul {
+  @apply my-1.5 pl-5 space-y-0.5;
+}
+
+.resume-content li {
+  @apply text-sm text-[#0F172A] leading-relaxed list-disc;
+}
+
+.resume-content p {
+  @apply text-sm text-[#0F172A] leading-relaxed my-0.5;
+}
+
+.resume-content strong {
+  @apply font-semibold;
+}
+
+.resume-content .resume-spacer {
+  @apply block h-2;
 }
