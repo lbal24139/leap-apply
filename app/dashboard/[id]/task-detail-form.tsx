@@ -6,6 +6,7 @@ import type { UpdateResult } from './actions'
 
 type Props = {
   taskId: string
+  company: string
   action: (prevState: UpdateResult, formData: FormData) => Promise<UpdateResult>
   existingProfile: string | null
   jobDescription: string | null
@@ -18,8 +19,40 @@ type GenerateResult = {
 
 const initialSaveState: UpdateResult = { success: false }
 
+async function downloadAsPDF(content: string, filename: string) {
+  const { default: jsPDF } = await import('jspdf')
+
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' })
+  const marginX = 40
+  const marginY = 40
+  const maxWidth = doc.internal.pageSize.getWidth() - marginX * 2
+  const pageHeight = doc.internal.pageSize.getHeight()
+  const fontSize = 10
+  const lineHeight = 14
+
+  doc.setFont('courier', 'normal')
+  doc.setFontSize(fontSize)
+
+  let y = marginY + fontSize
+
+  for (const rawLine of content.split('\n')) {
+    const wrapped = doc.splitTextToSize(rawLine || ' ', maxWidth) as string[]
+    for (const line of wrapped) {
+      if (y + lineHeight > pageHeight - marginY) {
+        doc.addPage()
+        y = marginY + fontSize
+      }
+      doc.text(line, marginX, y)
+      y += lineHeight
+    }
+  }
+
+  doc.save(filename)
+}
+
 export default function TaskDetailForm({
   taskId,
+  company,
   action,
   existingProfile,
   jobDescription,
@@ -189,6 +222,12 @@ export default function TaskDetailForm({
                 title="Tailored Resume"
                 content={genResult.resume}
                 variant="default"
+                onDownload={() =>
+                  downloadAsPDF(
+                    genResult.resume,
+                    `resume-${company.toLowerCase().replace(/\s+/g, '-')}.pdf`,
+                  )
+                }
               />
             )}
             {genResult.gaps && (
@@ -222,16 +261,38 @@ function ResultCard({
   title,
   content,
   variant,
+  onDownload,
 }: {
   title: string
   content: string
   variant: 'default' | 'amber'
+  onDownload?: () => void
 }) {
   const bg = variant === 'amber' ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-200'
 
   return (
     <div>
-      <h4 className="mb-2 text-sm font-semibold text-gray-900">{title}</h4>
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-sm font-semibold text-gray-900">{title}</h4>
+        {onDownload && (
+          <button
+            type="button"
+            onClick={onDownload}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M8 1v9m0 0L5 7m3 3 3-3M2 12v1a2 2 0 002 2h8a2 2 0 002-2v-1"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Download PDF
+          </button>
+        )}
+      </div>
       <div className={`rounded-xl border p-5 ${bg}`}>
         <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-gray-800">
           {content}
